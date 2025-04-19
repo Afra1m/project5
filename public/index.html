@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JWT Аутентификация</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-container {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input {
+            display: block;
+            margin-bottom: 10px;
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <h1>JWT Аутентификация</h1>
+    
+    <div class="form-container">
+        <h2>Регистрация</h2>
+        <input type="text" id="regUsername" placeholder="Имя пользователя">
+        <input type="password" id="regPassword" placeholder="Пароль">
+        <button onclick="register()">Зарегистрироваться</button>
+        <div id="regMessage" class="message"></div>
+    </div>
+
+    <div class="form-container">
+        <h2>Вход</h2>
+        <input type="text" id="loginUsername" placeholder="Имя пользователя">
+        <input type="password" id="loginPassword" placeholder="Пароль">
+        <button onclick="login()">Войти</button>
+        <div id="loginMessage" class="message"></div>
+    </div>
+
+    <div class="form-container">
+        <h2>Защищенные данные</h2>
+        <button onclick="getProtectedData()">Получить данные</button>
+        <div id="protectedMessage" class="message"></div>
+    </div>
+
+    <script>
+        let token = null;
+
+        async function register() {
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                const messageDiv = document.getElementById('regMessage');
+                
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = 'Регистрация успешна!';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.message;
+                }
+            } catch (error) {
+                document.getElementById('regMessage').className = 'message error';
+                document.getElementById('regMessage').textContent = 'Ошибка при регистрации';
+            }
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                const messageDiv = document.getElementById('loginMessage');
+                
+                if (response.ok) {
+                    token = data.token;
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = 'Вход выполнен успешно!';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.message;
+                }
+            } catch (error) {
+                document.getElementById('loginMessage').className = 'message error';
+                document.getElementById('loginMessage').textContent = 'Ошибка при входе';
+            }
+        }
+
+        async function getProtectedData() {
+            if (!token) {
+                document.getElementById('protectedMessage').className = 'message error';
+                document.getElementById('protectedMessage').textContent = 'Сначала войдите в систему';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/protected', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                const messageDiv = document.getElementById('protectedMessage');
+                
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = `Данные получены: ${JSON.stringify(data)}`;
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.message;
+                }
+            } catch (error) {
+                document.getElementById('protectedMessage').className = 'message error';
+                document.getElementById('protectedMessage').textContent = 'Ошибка при получении данных';
+            }
+        }
+    </script>
+</body>
+</html> 

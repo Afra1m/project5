@@ -11,8 +11,8 @@
 
 1. Клонируйте репозиторий:
 ```bash
-git clone <url-репозитория>
-cd <имя-директории>
+git clone https://github.com/Afra1m/project5.git
+cd project5
 ```
 
 2. Установите зависимости:
